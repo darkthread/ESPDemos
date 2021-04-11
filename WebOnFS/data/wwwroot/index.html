@@ -1,0 +1,38 @@
+<!DOCType html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LED Switch Demo</title>
+    <link rel="icon" type="image/gif" href="imgs/favicon.gif">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container" id="app">
+        <div class="banner">
+            <img src="imgs/guineapig.gif" />
+            <div class="site">Guineapig FS Web</div>
+            <div class="title">LED Switch Demo</div>
+        </div>
+        <div class="hole">
+            <label>
+                <div class="switch-wrap">
+                    <input type="checkbox" v-model="LedSwitch" />
+                    <div class="switch"></div>
+                </div>
+                <span class="tag">LED</span>
+            </label>
+        </div>
+    </div>
+    <!-- https://cdnjs.cloudflare.com/ajax/libs/vue/3.0.11/vue.global.prod.js -->
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <!-- https://code.jquery.com/jquery-3.6.0.min.js -->
+    <script src="js/vue.global.prod.js"></script>
+    <script src="js/main.js"></script>    
+    <script src="/led/status"></script>
+</body>
+
+</html>
