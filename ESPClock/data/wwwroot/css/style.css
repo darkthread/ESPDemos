@@ -1,0 +1,117 @@
+.container {
+    width: 320px;
+    background-color: rgb(54, 60, 77);
+    padding: 1em;
+    margin: 0 auto;
+}
+.banner .site {
+    padding-top: 8px;
+    font-size: 15pt;
+    color: #ddd;
+    text-shadow: 2px 1px 1px black;
+}
+.banner .title {
+    font-size: 16pt;
+    color: yellow;
+}
+.banner img {
+    float: left;
+    margin-right: 12px;
+    margin-left: 6px;
+}
+.hole {
+    border: 0.3em solid gray;
+    margin-top: 1.2em;
+    min-height: 140px;
+    border-right-color: #ddd;
+    border-bottom-color: #ddd;
+    background-color: silver;
+
+}
+
+/* https://codepen.io/liamj/pen/QYyBzz */
+html {
+    box-sizing: border-box;
+    height: 100%;
+  }
+  
+  *, *::before, *::after {
+    box-sizing: inherit;
+  }
+  
+  .hole {
+    background: #b7b7b7;
+  }
+  .flex-box {
+    padding: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  label {
+      cursor: pointer;
+  }
+  
+.switch-wrap {
+    background: #15273b;
+    padding: 5px;
+    width: 60px;
+    height: 35px;
+    border-radius: 33.5px;
+    float: left;
+  }
+  .switch-wrap input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .switch {
+    height: 100%;
+    display: grid;
+    grid-template-columns: 0fr 1fr 1fr;
+    transition: 0.2s;
+  }
+  .switch::after {
+    content: "";
+    border-radius: 50%;
+    background: #ccc;
+    grid-column: 2;
+    transition: background 0.2s;
+  }
+  
+  input:checked + .switch {
+    grid-template-columns: 1fr 1fr 0fr;
+  }
+  input:checked + .switch::after {
+    background-color: #52cf71;
+  }
+  
+  .tag {
+      margin-left: 0.5em;
+      font-size: 22pt;
+      line-height: 22pt;
+  }
+
+  .input-block {
+    display: block;
+  }
+
+  input[type=text], button {
+    font-size: 18pt;
+    margin: 6px;
+    width: 95%;
+  }
+  input[type=text] {
+    padding: 6px 3px;
+  }
+  button {
+    padding: 6px 10px;
+    font-size:16pt;
+  }
+  .slider {
+    font-size: 18pt;
+    text-align: center;
+    padding: 6px;
+  }
