@@ -2,7 +2,7 @@
 #include <Adafruit_I2CDevice.h>
 #include <Adafruit_SSD1306.h>
 #include <ESPAsyncWebServer.h>
-#include "Guineapig.WiFiConfig.h"
+#include <Guineapig.WiFiConfig.h>
 #ifdef ESP8266
 #define WebFS LittleFS
 #include "LittleFS.h"
