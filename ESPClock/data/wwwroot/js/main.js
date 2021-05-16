@@ -25,12 +25,12 @@ var vm = Vue.createApp({
         Speed: (newValue) => {
             debounce("set-speed", function() {
                 $.post("/set-scroll-delay", { d: 100 - newValue });
-            }, 800);
+            }, 250);
         },
         Brightness: (v) => {
             debounce("set-brightness", function() {
                 $.post("/set-brightness", { l: v });
-            }, 800);
+            }, 250);
         }
     },
     methods: {

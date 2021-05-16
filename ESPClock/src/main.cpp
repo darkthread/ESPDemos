@@ -36,6 +36,11 @@ NTPClient timeClient(ntpUDP);
 #include "GuineaPig_LedMatrix.h"
 GuineaPig_LedMatrix led;
 bool clockMode = true;
+int brightness = 1;
+String message = "darkthread";
+bool enableScroll = false;
+int scrollDelay = 50;
+
 
 void saveStatus(String key, String value)
 {
@@ -126,19 +131,33 @@ void setup()
                 saveStatus(ledKey, ledOn ? "Y" : "N");
                 request->send(200, "text/plain", "OK");
               });
+    server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request)
+              { 
+                auto escaped = message;
+                escaped.replace("'", "\'");
+                request->send(200, "application/javascript",
+                              String("vm.ClockMode=!!") + String(clockMode) + 
+                              ";vm.Brigthness=" + String(brightness) +
+                              ";vm.Message='" + String(escaped) + 
+                              "';vm.EnableScroll=!!" + String(enableScroll) + 
+                              ";vm.Speed=" + String(100 - scrollDelay));
+              });
     server.on("/show-message", HTTP_POST, [](AsyncWebServerRequest *request)
               {
-                led.setText(String("    ") + request->arg("m"));
+                message = request->arg("m");
+                led.setText(message);
                 request->send(200, "text/plain", "OK");
               });
     server.on("/set-scroll-delay", HTTP_POST, [](AsyncWebServerRequest *request)
               {
-                led.setScrollingDelay(request->arg("d").toInt());
+                scrollDelay = request->arg("d").toInt();
+                led.setScrollingDelay(scrollDelay);
                 request->send(200, "text/plain", "OK");
               });
     server.on("/toggle-scroll", HTTP_POST, [](AsyncWebServerRequest *request)
               {
-                led.toggleScroll(request->arg("v"));
+                enableScroll = request->arg("v") == "Y";
+                led.toggleScroll(enableScroll);
                 request->send(200, "text/plain", "OK");
               });
     server.on("/set-mode", HTTP_POST, [](AsyncWebServerRequest *request)
@@ -149,7 +168,8 @@ void setup()
               });
     server.on("/set-brightness", HTTP_POST, [](AsyncWebServerRequest *request)
               {
-                led.setBrightness(request->arg("l").toInt());
+                brightness = request->arg("l").toInt();
+                led.setBrightness(brightness);
                 request->send(200, "text/plain", "OK");
               });
     //網站可設定帳號密碼

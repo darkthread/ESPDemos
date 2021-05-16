@@ -17,13 +17,14 @@
 #define LEDMATRIX_CS D8
 #endif
 #define LEDMATRIX_WIDTH 64
+#define LED_FONT_WIDTH 6
 
 LEDMatrixDriver lmd(4, LEDMATRIX_CS);
 
 /**
  * This draws a sprite to the given position using the width and height supplied (usually 8x8)
  */
-void drawSprite(byte *sprite, int x, int y, int width, int height)
+void GuineaPig_LedMatrix::drawSprite(byte *sprite, int x, int y, int width, int height)
 {
     // row bit mask
     byte mask;
@@ -40,29 +41,27 @@ void drawSprite(byte *sprite, int x, int y, int width, int height)
         }
     }
 }
-const int fontWidth = 6;
-byte fontData[fontWidth];
-void drawString(const char *text, int len, int x, int y)
+
+void GuineaPig_LedMatrix::drawString(const char *text, int len, int x, int y)
 {
     for (int idx = 0; idx < len; idx++)
     {
         int c = text[idx];
 
         // stop if char is outside visible area
-        if (x + idx * fontWidth > LEDMATRIX_WIDTH)
+        if (x + idx * LED_FONT_WIDTH > LEDMATRIX_WIDTH)
             return;
 
         // only draw if char is visible
-        if (8 + x + idx * fontWidth > 0)
+        if (8 + x + idx * LED_FONT_WIDTH > 0)
         {
-            memcpy_P(fontData, font5x8[c - 1], sizeof(fontData));
-            drawSprite(fontData, x + idx * fontWidth, y, fontWidth, 8);
+            memcpy_P(this->fontData, font5x8[c - 1], LED_FONT_WIDTH);
+            drawSprite(fontData, x + idx * LED_FONT_WIDTH, y, LED_FONT_WIDTH, 8);
         }
     }
 }
 
-String message = "darkthread";
-int ledX = 0;
+
 //std::stringstream _sb;
 void GuineaPig_LedMatrix::init()
 {
@@ -71,8 +70,6 @@ void GuineaPig_LedMatrix::init()
     lmd.setIntensity(0); // 0 = low, 10 = high    
 }
 
-int msgLen;
-int scrollDelay = 50;
 
 void GuineaPig_LedMatrix::setScrollingDelay(int delay)
 {
@@ -87,12 +84,12 @@ void GuineaPig_LedMatrix::clear() {
 }
 
 void GuineaPig_LedMatrix::showText() {
-    drawString(message.c_str(), message.length(), ledX, 0);
+    drawString(this->message.c_str(), this->message.length(), ledX, 0);
     lmd.display();
 }
 
-void GuineaPig_LedMatrix::toggleScroll(String flag) {
-    enableScrolling = flag == "Y";
+void GuineaPig_LedMatrix::toggleScroll(bool enabled) {
+    enableScrolling = enabled;
     clear();
     showText();
 }
@@ -100,8 +97,8 @@ void GuineaPig_LedMatrix::toggleScroll(String flag) {
 void GuineaPig_LedMatrix::loop()
 {
     if (!enableScrolling) return;
-    msgLen = message.length();
-    drawString(message.c_str(), msgLen, ledX, 0);
+    msgLen = this->message.length();
+    drawString(this->message.c_str(), msgLen, ledX, 0);
     // In case you wonder why we don't have to call lmd.clear() in every loop: The font has a opaque (black) background...
 
     // Toggle display of the new framebuffer
@@ -111,26 +108,26 @@ void GuineaPig_LedMatrix::loop()
     delay(scrollDelay);
 
     // Advance to next coordinate
-    if (--ledX < msgLen * -fontWidth)
+    if (--ledX < msgLen * -LED_FONT_WIDTH)
     {
-        ledX = LEDMATRIX_WIDTH;
+        ledX = 32;
     }
 }
 
 void GuineaPig_LedMatrix::setText(String text)
 {
     clear();
-    message = text;
-    ledX =  8 * (1 - LEDMATRIX_WIDTH / 16);
+    this->message = text;
+    ledX =  0; //8 * (1 - LEDMATRIX_WIDTH / 16);
     showText();
 }
 
-void drawDigit(byte n, int x) {
-    memcpy_P(fontData, fontDigits[n], 4);
+void GuineaPig_LedMatrix::drawDigit(byte n, int x) {
+    memcpy_P(this->fontData, fontDigits[n], 4);
     if (n == 10)
-        drawSprite(fontData, x, 0, 1, 8);
+        drawSprite(this->fontData, x, 0, 1, 8);
     else
-        drawSprite(fontData, x, 0, 4, 8);
+        drawSprite(this->fontData, x, 0, 4, 8);
 }
 
 void GuineaPig_LedMatrix::printTime(int h, int m, int s) {
