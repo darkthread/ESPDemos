@@ -47,6 +47,8 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
+    background-color: #aaa;
+    margin: 6px;
   }
   label {
       cursor: pointer;
@@ -58,7 +60,7 @@ html {
     width: 60px;
     height: 35px;
     border-radius: 33.5px;
-    float: left;
+    float: right;
   }
   .switch-wrap input {
     position: absolute;
@@ -89,8 +91,9 @@ html {
   }
   
   .tag {
-      margin-left: 0.5em;
-      font-size: 22pt;
+      margin-right: 0.5em;
+      margin-top: 6px;
+      font-size: 20pt;
       line-height: 22pt;
   }
 
@@ -110,8 +113,16 @@ html {
     padding: 6px 10px;
     font-size:16pt;
   }
-  .slider {
+  dl {
     font-size: 18pt;
-    text-align: center;
     padding: 6px;
+    margin: 6px;
+    background-color: #aaa;
   }
+  dt {
+    font-size: 16pt;
+  }
+  dd input[type=range] {
+    width: 99%;
+  }
+

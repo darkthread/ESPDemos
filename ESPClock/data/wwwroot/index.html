@@ -18,24 +18,47 @@
             <div class="title">LED Matrix Demo</div>
         </div>
         <div class="hole">
-            <div>
-                <input type=text v-model="Message" placeholder="Message" />
-            </div>
-            <div>
-                <button v-on:click="SendMessage()">Set Text</button>
-            </div>
             <div class="flex-box">
                 <label>
+                    <span class="tag">CLOCK</span>
                     <div class="switch-wrap">
-                        <input type="checkbox" v-model="EnableScroll" />
+                        <input type="checkbox" v-model="ClockMode" />
                         <div class="switch"></div>
                     </div>
-                    <span class="tag">SCROLL</span>
                 </label>
-                </div>
+            </div>
             <div class=slider>
-                SPEED:
-                <input type="range" min="30" step="5" max="90" class="slider" v-model="Speed" />
+                <dl>
+                    <dt>BRIGHTNESS</dt>
+                    <dd>
+                        <input type="range" min="0" step="1" max="15" class="slider" v-model="Brightness" />
+                    </dd>
+                </dl>
+            </div>
+            <div v-show="!ClockMode">
+                <div>
+                    <input type=text v-model="Message" placeholder="Message" />
+                </div>
+                <div>
+                    <button v-on:click="SendMessage()">Set Text</button>
+                </div>
+                <div class="flex-box">
+                    <label>
+                        <div class="switch-wrap">
+                            <input type="checkbox" v-model="EnableScroll" />
+                            <div class="switch"></div>
+                        </div>
+                        <span class="tag">SCROLL</span>
+                    </label>
+                </div>
+                <div class=slider v-show="EnableScroll">
+                    <dl>
+                        <dt>SPEED</dt>
+                        <dd>
+                            <input type="range" min="30" step="5" max="90" class="slider" v-model="Speed" />
+                        </dd>
+                    </dl>
+                </div>
             </div>
         </div>
     </div>
@@ -43,7 +66,7 @@
     <script src="js/jquery-3.6.0.min.js"></script>
     <!-- https://code.jquery.com/jquery-3.6.0.min.js -->
     <script src="js/vue.global.prod.js"></script>
-    <script src="js/main.js"></script>    
+    <script src="js/main.js"></script>
     <script src="/led/status"></script>
 </body>
 

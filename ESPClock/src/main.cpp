@@ -144,9 +144,14 @@ void setup()
     server.on("/set-mode", HTTP_POST, [](AsyncWebServerRequest *request)
               {
                 clockMode = request->arg("m") == "clock";
+                if (!clockMode) led.showText();
                 request->send(200, "text/plain", "OK");
               });
-
+    server.on("/set-brightness", HTTP_POST, [](AsyncWebServerRequest *request)
+              {
+                led.setBrightness(request->arg("l").toInt());
+                request->send(200, "text/plain", "OK");
+              });
     //網站可設定帳號密碼
     //staticWebHandler.setAuthentication(webUserId.c_str(), webUserPasswd.c_str());
     server.onNotFound([](AsyncWebServerRequest *request)

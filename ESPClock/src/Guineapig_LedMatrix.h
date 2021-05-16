@@ -11,7 +11,6 @@ public:
     void setScrollingDelay(int delay);
     void loop();
     void printTime(int h, int m, int s);
-    void setBrightness(int intensity);
-private:
+    void setBrightness(int level);
     void showText();
 };
