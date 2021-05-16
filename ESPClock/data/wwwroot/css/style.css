@@ -125,4 +125,21 @@ html {
   dd input[type=range] {
     width: 99%;
   }
-
+  .tab {
+    display: flex;
+  }
+  .tab button {
+    margin: 0;
+    font-size: 14t;
+    background-color: #aaa;
+    color: #555;
+    border: 1px solid gray;
+    border-bottom: none;
+  }
+  .tab button.active {
+    background-color: #ddd;
+    color: black;
+  }
+[v-cloak] {
+  display: none;
+}

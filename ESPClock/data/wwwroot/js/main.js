@@ -8,7 +8,7 @@ var vm = Vue.createApp({
     data() {
         return {
             LedSwitch: true,
-            ClockMode: true,
+            Mode: "clock",
             Brightness: 1,
             EnableScroll: false,
             Message: "darkthread",
@@ -21,7 +21,6 @@ var vm = Vue.createApp({
     watch: {
         LedSwitch: (v) => $.post('/led/switch?v=' + (v ? "on" : "off")),
         EnableScroll: function(v) { $.post("/toggle-scroll", { v: this.EnableScroll ? "Y" : "N" }) },
-        ClockMode: function(v) { $.post("/set-mode", { m: this.ClockMode ? "clock" : "marquee" }) },
         Speed: (newValue) => {
             debounce("set-speed", function() {
                 $.post("/set-scroll-delay", { d: 100 - newValue });
@@ -36,6 +35,16 @@ var vm = Vue.createApp({
     methods: {
         SendMessage: function() {
             $.post("/show-message", { m: this.Message });
+        },
+        StartTimer: function() {
+            $.post("/start-timer");
+        },
+        StopTimer: function() {
+            $.post("/stop-timer");
+        },
+        SetMode: function(mode) {
+            this.Mode = mode;
+            $.post("/set-mode", { m: mode });
         }
     }
 

@@ -36,11 +36,17 @@ NTPClient timeClient(ntpUDP);
 #include "GuineaPig_LedMatrix.h"
 GuineaPig_LedMatrix led;
 bool clockMode = true;
+bool timerMode = false;
+bool timerRunning = false;
+long timerTotalSecs = 0;
+long timerStartMillis = -1;
+int x = 0;
+int lastSec = -1;
+
 int brightness = 1;
 String message = "darkthread";
 bool enableScroll = false;
 int scrollDelay = 50;
-
 
 void saveStatus(String key, String value)
 {
@@ -132,15 +138,16 @@ void setup()
                 request->send(200, "text/plain", "OK");
               });
     server.on("/status", HTTP_GET, [](AsyncWebServerRequest *request)
-              { 
+              {
                 auto escaped = message;
                 escaped.replace("'", "\'");
                 request->send(200, "application/javascript",
-                              String("vm.ClockMode=!!") + String(clockMode) + 
-                              ";vm.Brigthness=" + String(brightness) +
-                              ";vm.Message='" + String(escaped) + 
-                              "';vm.EnableScroll=!!" + String(enableScroll) + 
-                              ";vm.Speed=" + String(100 - scrollDelay));
+                              String("vm.ClockMode=!!") + String(clockMode) +
+                                  ";vm.Brigthness=" + String(brightness) +
+                                  ";vm.Message='" + String(escaped) +
+                                  "';vm.EnableScroll=!!" + String(enableScroll) +
+                                  ";vm.Speed=" + String(100 - scrollDelay) +
+                                  ";vm.TimerMode=!!" + String(timerMode));
               });
     server.on("/show-message", HTTP_POST, [](AsyncWebServerRequest *request)
               {
@@ -163,9 +170,25 @@ void setup()
     server.on("/set-mode", HTTP_POST, [](AsyncWebServerRequest *request)
               {
                 clockMode = request->arg("m") == "clock";
-                if (!clockMode) led.showText();
+                timerMode = request->arg("m") == "timer";
+                if (!clockMode)
+                  led.showText();
+                if (timerMode) 
+                  led.setText("TIMER");
                 request->send(200, "text/plain", "OK");
               });
+    server.on("/start-timer", HTTP_POST, [](AsyncWebServerRequest *request)
+              {
+                timerTotalSecs = 0;
+                timerStartMillis = millis();
+                timerRunning = true;
+                request->send(200, "text/plain", "OK");
+              });
+    server.on("/stop-timer", HTTP_POST, [](AsyncWebServerRequest *request)
+              {
+                timerRunning = false;
+                request->send(200, "text/plain", "OK");
+              });              
     server.on("/set-brightness", HTTP_POST, [](AsyncWebServerRequest *request)
               {
                 brightness = request->arg("l").toInt();
@@ -181,20 +204,35 @@ void setup()
   led.init();
 }
 
-
-int x = 0;
-int lastSec = -1;
+#define D2(n) (n < 10 ? String("0") + String(n) : String(n));
 
 void loop()
 {
   unsigned long epochTime = timeClient.getEpochTime();
   struct tm *ptm = gmtime((time_t *)&epochTime);
+  int currSec = ptm->tm_sec;
   if (clockMode)
   {
-    int currSec = ptm->tm_sec;
     if (currSec != lastSec)
       led.printTime(ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
     lastSec = currSec;
+    delay(100);
+  }
+  else if (timerMode)
+  {
+    if (timerRunning)
+    {
+      if (currSec != lastSec)
+      {
+        timerTotalSecs = (millis() - timerStartMillis) / 1000;
+        String m = D2(timerTotalSecs / 60);
+        String s = D2(timerTotalSecs % 60);
+        String timerDisplay = m + ":" + s;
+        led.setText(timerDisplay);
+      }
+      lastSec = currSec;
+      delay(500);
+    }
   }
   else
   {

@@ -11,22 +11,13 @@
 </head>
 
 <body>
-    <div class="container" id="app">
+    <div class="container" id="app" v-cloak>
         <div class="banner">
             <img src="imgs/guineapig.gif" />
             <div class="site">Guineapig Lab</div>
             <div class="title">LED Matrix Demo</div>
         </div>
         <div class="hole">
-            <div class="flex-box">
-                <label>
-                    <span class="tag">CLOCK</span>
-                    <div class="switch-wrap">
-                        <input type="checkbox" v-model="ClockMode" />
-                        <div class="switch"></div>
-                    </div>
-                </label>
-            </div>
             <div class=slider>
                 <dl>
                     <dt>BRIGHTNESS</dt>
@@ -34,8 +25,23 @@
                         <input type="range" min="0" step="1" max="15" class="slider" v-model="Brightness" />
                     </dd>
                 </dl>
+            </div>            
+            <div class="tab">
+                <button :class="{active:Mode==='clock'}" @click="SetMode('clock')">Clock</button>
+                <button :class="{active:Mode==='timer'}" @click="SetMode('timer')">Timer</button>
+                <button :class="{active:Mode==='marquee'}" @click="SetMode('marquee')">Marquee</button>
             </div>
-            <div v-show="!ClockMode">
+            <div v-show="Mode==='clock'">
+            </div>
+            <div v-show="Mode==='timer'">
+                <div>
+                    <button @click="StartTimer()">Start Timer</button>
+                </div>
+                <div>
+                    <button @click="StopTimer()">Stop Timer</button>
+                </div>
+            </div>
+            <div v-show="Mode==='marquee'">
                 <div>
                     <input type=text v-model="Message" placeholder="Message" />
                 </div>
