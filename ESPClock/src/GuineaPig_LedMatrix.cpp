@@ -130,6 +130,11 @@ void GuineaPig_LedMatrix::drawDigit(byte n, int x) {
         drawSprite(this->fontData, x, 0, 4, 8);
 }
 
+void GuineaPig_LedMatrix::drawTinyDigit(byte n, int x) {
+    memcpy_P(this->fontData, fontTinyDigits[n], 3);
+    drawSprite(this->fontData, x, 2, 3, 8);
+}
+
 void GuineaPig_LedMatrix::printTime(int h, int m, int s) {
     int x = 0;
     lmd.clear();
@@ -137,17 +142,17 @@ void GuineaPig_LedMatrix::printTime(int h, int m, int s) {
     x += 5;
     drawDigit(h % 10, x);
     x += 5;
-    //drawDigit(10, x);
-    x++;
+    drawDigit(10, x);
+    x += 2;
     drawDigit(m / 10, x);
     x += 5;
     drawDigit(m % 10, x);
     x += 5;
-    //drawDigit(10, x);
-    x++;
-    drawDigit(s / 10, x);
-    x += 5;
-    drawDigit(s % 10, x);
+    drawDigit(10, x);
+    x += 2;
+    drawTinyDigit(s / 10, x);
+    x += 4;
+    drawTinyDigit(s % 10, x);
     lmd.display();
 }
 

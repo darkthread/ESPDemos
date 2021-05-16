@@ -20,6 +20,7 @@ private:
     int ledX = 0;
     byte fontData[8];    
     void drawDigit(byte n, int x);
+    void drawTinyDigit(byte n, int x);
     void drawString(const char *text, int len, int x, int y);
     void drawSprite(byte *sprite, int x, int y, int width, int height);
 };

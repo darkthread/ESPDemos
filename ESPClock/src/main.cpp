@@ -183,7 +183,7 @@ void setup()
 
 
 int x = 0;
-String lastTime = "";
+int lastSec = -1;
 
 void loop()
 {
@@ -191,7 +191,10 @@ void loop()
   struct tm *ptm = gmtime((time_t *)&epochTime);
   if (clockMode)
   {
-    led.printTime(ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
+    int currSec = ptm->tm_sec;
+    if (currSec != lastSec)
+      led.printTime(ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
+    lastSec = currSec;
   }
   else
   {
