@@ -8,6 +8,7 @@ var vm = Vue.createApp({
     data() {
         return {
             LedSwitch: true,
+            EnableScroll: false,
             Text: "test",
             Message: "Hello World!",
             Speed: 50
@@ -18,6 +19,7 @@ var vm = Vue.createApp({
     },
     watch: {
         LedSwitch: (v) => $.post('/led/switch?v=' + (v ? "on" : "off")),
+        EnableScroll: function(v) { $.post("/toggle-scroll", { v: this.EnableScroll ? "Y" : "N" }) },
         Speed: (newValue) => {
             debounce("set-speed", function() {
                 $.post("/set-scroll-delay", { d: 100 - newValue });

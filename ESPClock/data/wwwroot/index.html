@@ -18,23 +18,23 @@
             <div class="title">LED Matrix Demo</div>
         </div>
         <div class="hole">
-            <div class="flex-box">
-            <label>
-                <div class="switch-wrap">
-                    <input type="checkbox" v-model="LedSwitch" />
-                    <div class="switch"></div>
-                </div>
-                <span class="tag">LED</span>
-            </label>
-            </div>
             <div>
                 <input type=text v-model="Message" placeholder="Message" />
             </div>
             <div>
-                <button v-on:click="SendMessage()">Show Message</button>
+                <button v-on:click="SendMessage()">Set Text</button>
             </div>
+            <div class="flex-box">
+                <label>
+                    <div class="switch-wrap">
+                        <input type="checkbox" v-model="EnableScroll" />
+                        <div class="switch"></div>
+                    </div>
+                    <span class="tag">SCROLL</span>
+                </label>
+                </div>
             <div class=slider>
-                Speed:
+                SPEED:
                 <input type="range" min="30" step="5" max="90" class="slider" v-model="Speed" />
             </div>
         </div>

@@ -35,7 +35,7 @@ NTPClient timeClient(ntpUDP);
 
 #include "GuineaPig_LedMatrix.h"
 GuineaPig_LedMatrix led;
-
+bool clockMode = true;
 
 void saveStatus(String key, String value)
 {
@@ -68,13 +68,13 @@ void printOled(String msg)
 void setup()
 {
   Serial.begin(115200);
-#ifdef USE_LITTLEFS 
+#ifdef USE_LITTLEFS
   if (!WebFS.begin())
   {
     Serial.println("LittleFS Mount Failed");
     return;
   }
-#else  
+#else
   if (!WebFS.begin(false))
   {
     Serial.println("SPIFFS Mount Failed");
@@ -96,7 +96,7 @@ void setup()
   display.setTextColor(WHITE, BLACK);
   display.setCursor(0, 56);
   display.ttyPrintln();
-  WiFiConfig.logCallback = printOled;  
+  WiFiConfig.logCallback = printOled;
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, (readStatus(ledKey) == "Y" ? LED_ON : LED_OFF));
   if (WiFiConfig.connectWiFi())
@@ -105,48 +105,71 @@ void setup()
     // https://randomnerdtutorials.com/esp32-ntp-client-date-time-arduino-ide/
     timeClient.begin();
     timeClient.setTimeOffset(8 * 3600); //UTC+8
-    while (!timeClient.update()) {
+    while (!timeClient.update())
+    {
       timeClient.forceUpdate();
     }
 
     auto staticWebHandler =
         server.serveStatic("/html", WebFS, "/wwwroot/")
-            .setDefaultFile("index.html");  
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-      return request->redirect("/html/");
-    });
-    server.on("/led/status", HTTP_GET, [](AsyncWebServerRequest *request) {
-      request->send(200, "application/javascript",
-                    String("vm.LedSwitch=") + (readStatus(ledKey) == "Y" ? "true" : "false"));
-    });
-    server.on("/led/switch", HTTP_POST, [](AsyncWebServerRequest *request) {
-      auto ledOn = request->arg("v") == "on";
-      //Save LED status to file
-      digitalWrite(LED_BUILTIN, ledOn ? LED_ON : LED_OFF);
-      saveStatus(ledKey, ledOn ? "Y" : "N");
-      request->send(200, "text/plain", "OK");
-    });
-    server.on("/show-message", HTTP_POST, [](AsyncWebServerRequest *request) {
-      led.setText(String("    ") + request->arg("m"));
-      request->send(200, "text/plain", "OK");
-    });
-    server.on("/set-scroll-delay", HTTP_POST, [](AsyncWebServerRequest *request) {
-      led.setScrollingDelay(request->arg("d").toInt());
-      request->send(200, "text/plain", "OK");
-    });
+            .setDefaultFile("index.html");
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+              { return request->redirect("/html/"); });
+    server.on("/led/status", HTTP_GET, [](AsyncWebServerRequest *request)
+              { request->send(200, "application/javascript",
+                              String("vm.LedSwitch=") + (readStatus(ledKey) == "Y" ? "true" : "false")); });
+    server.on("/led/switch", HTTP_POST, [](AsyncWebServerRequest *request)
+              {
+                auto ledOn = request->arg("v") == "on";
+                //Save LED status to file
+                digitalWrite(LED_BUILTIN, ledOn ? LED_ON : LED_OFF);
+                saveStatus(ledKey, ledOn ? "Y" : "N");
+                request->send(200, "text/plain", "OK");
+              });
+    server.on("/show-message", HTTP_POST, [](AsyncWebServerRequest *request)
+              {
+                led.setText(String("    ") + request->arg("m"));
+                request->send(200, "text/plain", "OK");
+              });
+    server.on("/set-scroll-delay", HTTP_POST, [](AsyncWebServerRequest *request)
+              {
+                led.setScrollingDelay(request->arg("d").toInt());
+                request->send(200, "text/plain", "OK");
+              });
+    server.on("/toggle-scroll", HTTP_POST, [](AsyncWebServerRequest *request)
+              {
+                led.toggleScroll(request->arg("v"));
+                request->send(200, "text/plain", "OK");
+              });
+    server.on("/set-mode", HTTP_POST, [](AsyncWebServerRequest *request)
+              {
+                clockMode = request->arg("m") == "clock";
+                request->send(200, "text/plain", "OK");
+              });
 
     //網站可設定帳號密碼
     //staticWebHandler.setAuthentication(webUserId.c_str(), webUserPasswd.c_str());
-    server.onNotFound([](AsyncWebServerRequest *request) {
-      request->send(404);
-    });
+    server.onNotFound([](AsyncWebServerRequest *request)
+                      { request->send(404); });
     server.begin();
   }
   led.init();
 }
 
+
 int x = 0;
+String lastTime = "";
+
 void loop()
 {
-  led.loop();  
+  unsigned long epochTime = timeClient.getEpochTime();
+  struct tm *ptm = gmtime((time_t *)&epochTime);
+  if (clockMode)
+  {
+    led.printTime(ptm->tm_hour, ptm->tm_min, ptm->tm_sec);
+  }
+  else
+  {
+    led.loop();
+  }
 }

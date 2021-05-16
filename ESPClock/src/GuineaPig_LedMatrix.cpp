@@ -25,70 +25,82 @@ LEDMatrixDriver lmd(4, LEDMATRIX_CS);
  */
 void drawSprite(byte *sprite, int x, int y, int width, int height)
 {
-    // The mask is used to get the column bit from the sprite row
-    byte mask = B10000000;
-
-    for (int iy = 0; iy < height; iy++)
+    // row bit mask
+    byte mask;
+    for (int ix = 0; ix < width; ix++)
     {
-        for (int ix = 0; ix < width; ix++)
+        mask = B10000000;
+        for (int iy = height - 1; iy >= 0; iy--)
         {
 
-            lmd.setPixel(x + ix, y + iy, (bool)(sprite[iy] & mask));
+            lmd.setPixel(x + ix, y + iy, (bool)(sprite[ix] & mask));
 
             // shift the mask by one pixel to the right
             mask = mask >> 1;
         }
-
-        // reset column mask
-        mask = B10000000;
     }
 }
-
-byte fontData[8];
+const int fontWidth = 6;
+byte fontData[fontWidth];
 void drawString(const char *text, int len, int x, int y)
 {
     for (int idx = 0; idx < len; idx++)
     {
         int c = text[idx];
-        if (c > 127)
-        {
-            c = c < 160 ? 32 : c - 32;
-        }
 
         // stop if char is outside visible area
-        if (x + idx * 8 > LEDMATRIX_WIDTH)
+        if (x + idx * fontWidth > LEDMATRIX_WIDTH)
             return;
 
         // only draw if char is visible
-        if (8 + x + idx * 8 > 0)
+        if (8 + x + idx * fontWidth > 0)
         {
-            memcpy_P(fontData, font8x8[c], sizeof(fontData));
-            drawSprite(fontData, x + idx * 8, y, 8, 8);
+            memcpy_P(fontData, font5x8[c - 1], sizeof(fontData));
+            drawSprite(fontData, x + idx * fontWidth, y, fontWidth, 8);
         }
     }
 }
 
-String message = "darkthread ";
+String message = "darkthread";
 int ledX = 0;
 //std::stringstream _sb;
 void GuineaPig_LedMatrix::init()
 {
     // init the display
     lmd.setEnabled(true);
-    lmd.setIntensity(0); // 0 = low, 10 = high
+    lmd.setIntensity(0); // 0 = low, 10 = high    
 }
 
 int msgLen;
 int scrollDelay = 50;
 
-void GuineaPig_LedMatrix::setScrollingDelay(int delay) {
+void GuineaPig_LedMatrix::setScrollingDelay(int delay)
+{
     scrollDelay = delay;
+}
+
+bool enableScrolling = false;
+
+void GuineaPig_LedMatrix::clear() {
+    lmd.clear();
+    lmd.display();
+}
+
+void GuineaPig_LedMatrix::showText() {
+    drawString(message.c_str(), message.length(), ledX, 0);
+    lmd.display();
+}
+
+void GuineaPig_LedMatrix::toggleScroll(String flag) {
+    enableScrolling = flag == "Y";
+    clear();
+    showText();
 }
 
 void GuineaPig_LedMatrix::loop()
 {
+    if (!enableScrolling) return;
     msgLen = message.length();
-    //drawStringIBM(text, len, x, 0);
     drawString(message.c_str(), msgLen, ledX, 0);
     // In case you wonder why we don't have to call lmd.clear() in every loop: The font has a opaque (black) background...
 
@@ -99,14 +111,51 @@ void GuineaPig_LedMatrix::loop()
     delay(scrollDelay);
 
     // Advance to next coordinate
-    if (--ledX < msgLen * -8)
+    if (--ledX < msgLen * -fontWidth)
     {
         ledX = LEDMATRIX_WIDTH;
     }
 }
 
-void GuineaPig_LedMatrix::setText(String text) {
-    drawString("    ", 4, 0, 0);
-    message = text + " ";
-    ledX = 0;
+void GuineaPig_LedMatrix::setText(String text)
+{
+    clear();
+    message = text;
+    ledX =  8 * (1 - LEDMATRIX_WIDTH / 16);
+    showText();
+}
+
+void drawDigit(byte n, int x) {
+    memcpy_P(fontData, fontDigits[n], 4);
+    if (n == 10)
+        drawSprite(fontData, x, 0, 1, 8);
+    else
+        drawSprite(fontData, x, 0, 4, 8);
+}
+
+void GuineaPig_LedMatrix::printTime(int h, int m, int s) {
+    int x = 0;
+    lmd.clear();
+    drawDigit(h / 10, x);
+    x += 5;
+    drawDigit(h % 10, x);
+    x += 5;
+    //drawDigit(10, x);
+    x++;
+    drawDigit(m / 10, x);
+    x += 5;
+    drawDigit(m % 10, x);
+    x += 5;
+    //drawDigit(10, x);
+    x++;
+    drawDigit(s / 10, x);
+    x += 5;
+    drawDigit(s % 10, x);
+    lmd.display();
+}
+
+void GuineaPig_LedMatrix::setBrightness(int level) {
+    if (level < 0) level = 0;
+    if (level > 15) level = 15;
+    lmd.setIntensity(level);
 }
